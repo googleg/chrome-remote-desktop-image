@@ -47,9 +47,11 @@ ARG USER=crduser
 ENV PIN=123456
 ENV CODE=4/xxx
 ENV HOSTNAME=myvirtualdesktop
+ENV PUID=99
+ENV PGID=100
 # ---------------------------------------------------------- 
 # ADD USER TO THE SPECIFIED GROUPS
-RUN adduser --disabled-password --gecos '' $USER
+RUN adduser --disabled-password --gecos '' --uid=$PUID --gid=$PGID $USER
 RUN mkhomedir_helper $USER
 RUN adduser $USER sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -62,7 +64,7 @@ RUN chmod a+rx .config/chrome-remote-desktop
 #RUN touch .config/chrome-remote-desktop/host.json
 RUN echo "/usr/bin/pulseaudio --start" > .chrome-remote-desktop-session
 RUN echo "startxfce4 :1030" >> .chrome-remote-desktop-session
-RUN sudo chown -R $USER:$USER /home/$USER
+RUN sudo chown -R $PUID:$PGID /home/$USER
 CMD \
    DISPLAY= /opt/google/chrome-remote-desktop/start-host --code=$CODE --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$HOSTNAME --pin=$PIN ; \
    HOST_HASH=$(python3 -c "import hashlib,socket; print(hashlib.md5(socket.gethostname().encode()).hexdigest())") && \
